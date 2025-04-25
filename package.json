@@ -1,13 +1,16 @@
 {
   "name": "puppeteer-pdf-api",
   "version": "1.0.0",
+  "description": "Generate PDF from Power BI report using Puppeteer",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
     "express": "^4.17.1",
-    "puppeteer": "^19.0.0",
     "puppeteer-core": "^19.0.0"
+  },
+  "engines": {
+    "node": "14.x"
   }
 }
