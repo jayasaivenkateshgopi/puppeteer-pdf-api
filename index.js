@@ -1,30 +1,37 @@
+const express = require('express');
 const puppeteer = require('puppeteer-core');
-const browserFetcher = puppeteer.createBrowserFetcher();
+const app = express();
+const port = process.env.PORT || 10000;
 
-const executablePath = process.env.CHROME_BIN || '/usr/bin/chromium-browser';  // Path to chromium in Render environment
+const executablePath = '/usr/bin/chromium-browser';  // Path to Chromium in Render environment
 
 app.get('/generate-pdf', async (req, res) => {
     const { url } = req.query;
-
     if (!url) {
         return res.status(400).send('Missing URL parameter');
     }
 
     try {
         const browser = await puppeteer.launch({
-            executablePath, // Use the chromium path from Render's environment
-            headless: true, // Run headless
-            args: ['--no-sandbox', '--disable-setuid-sandbox'] // Ensure Puppeteer can run on Render's environment
+            executablePath,  // Use the correct path for Chromium
+            headless: "new",  // Use the new headless mode
+            args: ['--no-sandbox', '--disable-setuid-sandbox']  // Cloud-friendly flags
         });
 
         const page = await browser.newPage();
-        await page.goto(url, { waitUntil: 'networkidle2' });
-        const pdfBuffer = await page.pdf();
-        await browser.close();
+        await page.goto(url, { waitUntil: 'networkidle2' });  // Wait for the page to fully load
+        const pdfBuffer = await page.pdf();  // Generate PDF from the page
 
-        res.contentType("application/pdf");
-        res.send(pdfBuffer);
+        await browser.close();  // Close the browser after generating PDF
+
+        res.contentType('application/pdf');
+        res.send(pdfBuffer);  // Send the PDF to the user
     } catch (error) {
+        console.error(error);
         res.status(500).send('Error generating PDF: ' + error.message);
     }
+});
+
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
